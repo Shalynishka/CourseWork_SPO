@@ -6,7 +6,7 @@ from Handler import CommandHandler
 
 alarms = dict()
 
-
+#На случай добавления многопоточности и точных дат
 # structure: day:hour:minute-message
 def parse_date(s):
     date = 0
@@ -58,21 +58,21 @@ def add_alarm(*args):
     id_user = args[1]
     s = args[0][11:]
     try:
-        d = parse_date(s[:s.index('-')])
-        if d == 0:
-            raise ValueError
-        # user_info =  + s[s.index('-') + 1:]
-        user_info = (d, s[s.index('-') + 1:])
-        # s = s[s.index('-') + 1:]
+    #    d = parse_date(s[:s.index('-')])
+    #    if d == 0:
+    #         raise ValueError
+    #    user_info = (d, s[s.index('-') + 1:])
+        user_info = s
         if id_user in alarms.keys():
             alarms.get(id_user).append(user_info)
         else:
             alarms[id_user] = [user_info]
     except ValueError:
-        message = 'Неверый формат команды. Правильный: [день]:[час]:[минута]-[сообщение]'
+        # message = 'Неверый формат команды. Правильный: [день]:[час]:[минута]-[сообщение]'
+        message = 'Ошибка команды'
         # send_message: problem with date
     finally:
-        print('message:' + message)
+        # print('message:' + message)
         return message, ''
 
 
@@ -88,8 +88,11 @@ def show_alarms(*args):
     if alarm is None:
         return 'Нет текущих напоминалок', ''
     else:
+        ind = 1
         for c in alarm:
-            message += c[0].strftime("%d числа, в %H:%M") + ' -> ' + c[1] + '\n'
+            #message += c[0].strftime("%d числа, в %H:%M") + ' -> ' + c[1] + '\n'
+            message += str(ind) +': ' + c + '\n'
+            ind += 1
         return message, ''
 
 
@@ -112,10 +115,8 @@ def delete_alarms(*args):
             else:
                 return 'Нет ваших напоминалок', ''
         except IndexError:
-            print('Ошибка. Неверный номер элемента.')
             return 'Ошибка. Неверный номер элемента.', ''
     else:
-        print('Ошибка. Индекс должен состоять из цифр.')
         return 'Ошибка. Неверный номер элемента.', ''
 
 
@@ -123,3 +124,17 @@ delete_command = CommandHandler.Command()
 delete_command.keys = ['/deleteAlarm']
 delete_command.description = '/deleteAlarm [N] - удалю напоминалку с номером N'
 delete_command.process = delete_alarms
+
+
+def delete_all(*args):
+    if args[1] in alarms.keys():
+        alarms.pop(args[1])
+        return 'Напоминания удалены', ''
+    else:
+        return 'Нет ваших напоминалок', ''
+
+
+delete_all_command = CommandHandler.Command()
+delete_all_command.keys = ['/deleteAll']
+delete_all_command.description = '/deleteAll - удалю все ваши напоминалки'
+delete_all_command.process = delete_all
