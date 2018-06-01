@@ -70,8 +70,10 @@ class GameChecker:
         else:
             return 'ok'
 
-        # проверка на первую букву слова игрока
+    # проверка на первую букву слова игрока
     def check_last_letter(self, letter):
+        if 'a' <= letter <= 'z' or 'A' <= letter <= 'Z':
+            return 'eng'
         if self.__useless_words.__len__() == 0:
             return 'ok'
         word = list(self.__useless_words[-1])
@@ -86,6 +88,7 @@ class GameChecker:
                 return 'bad'
             return 'ok'
 
+    # вернуть последнюю букву для следующего слова бота
     def get_last_letter(self, word):
         word_ls = list(word)
         word_ls.reverse()
@@ -115,16 +118,22 @@ def game(*args):
             del g
             gamers.pop(user_id)
             return res, ''
-        # игрок ввел слово не на ту букву
-        if g.check_last_letter(body[0]) == 'bad':
-            res = 'Не та буква!\n' + answers_for_lose[random.randint(1, 2)].format(str(g.get_result()))
+        # игрок ввел неправильное или несуществующее слово
+        if g.check_word_ex(body) == 'bad':
+            res = 'В слове ошибка! Ну или ты просто слова выдумываешь\n' + answers_for_lose[random.randint(1, 2)]. \
+                format(str(g.get_result()))
             del g
             gamers.pop(user_id)
             return res, ''
-        # игрок ввел неправильное или несуществующее слово
-        if g.check_word_ex(body) == 'bad':
-            res = 'В слове ошибка! Ну или ты просто слова выдумываешь\n' + answers_for_lose[random.randint(1, 2)].\
-                format(str(g.get_result()))
+        # игрок ввел английские слова
+        if g.check_last_letter(body[0]) == 'eng':
+            res = 'Да это вообще английский!\n' + answers_for_lose[random.randint(1, 2)].format(str(g.get_result()))
+            del g
+            gamers.pop(user_id)
+            return res, ''
+        # игрок ввел слово не на ту букву
+        if g.check_last_letter(body[0]) == 'bad':
+            res = 'Не та буква!\n' + answers_for_lose[random.randint(1, 2)].format(str(g.get_result()))
             del g
             gamers.pop(user_id)
             return res, ''
