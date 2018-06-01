@@ -72,7 +72,7 @@ class GameChecker:
 
     # проверка на первую букву слова игрока
     def check_last_letter(self, letter):
-        if 'a' <= letter <= 'z' or 'A' <= letter <= 'Z':
+        if not ('a' <= letter <= 'я' or 'а' <= letter <= 'Я'):
             return 'eng'
         if self.__useless_words.__len__() == 0:
             return 'ok'
@@ -113,8 +113,8 @@ def game(*args):
     else:
         g = gamers[user_id]
         # игрок захотел завершить игру
-        if body == 'end':
-            res = answers_for_end.format(str(g.get_result()))
+        if 'end' in body:
+            res = answers_for_end[random.randint(1, 2)].format(str(g.get_result()))
             del g
             gamers.pop(user_id)
             return res, ''
@@ -127,7 +127,7 @@ def game(*args):
             return res, ''
         # игрок ввел английские слова
         if g.check_last_letter(body[0]) == 'eng':
-            res = 'Да это вообще английский!\n' + answers_for_lose[random.randint(1, 2)].format(str(g.get_result()))
+            res = 'Э, не, только русские буквы!\n' + answers_for_lose[random.randint(1, 2)].format(str(g.get_result()))
             del g
             gamers.pop(user_id)
             return res, ''
