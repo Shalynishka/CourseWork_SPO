@@ -1,60 +1,51 @@
-filename = 'user_id_file.txt'
+from Handler.file_handler import FileWork
+import vk_api
+
+host = '153466186'
 
 
-def add_user(user_id):
-    user_list = get_user_list()
-    if user_list is None:
-        return
-    if str(user_id) in user_list:
-        return
-    else:
-        file = open(filename, 'at')
-        try:
-            file.write(str(user_id) + '\n')
-        finally:
-            file.close()
-    return
+class Admin:
+    @staticmethod
+    def choose_command(data, token):
+        if '//spam' in data:
+            Admin.spam(data[6:], token)
+        elif '//users' in data:
+            Admin.show_users(token)
+        else:
+            attachment = ''
+            mess = 'Команда не определена: ' + data
+            vk_api.send_messages(host, token, mess, attachment)
 
+    @staticmethod
+    def spam(mes, token):
+        attachment = ''
+        list_to_spam = FileWork.get_user_list()
+        for l in list_to_spam:
+            user_id0 = l
+            if user_id0 == host:
+                continue
+            else:
+                try:
+                    vk_api.send_messages(user_id0, token, mes, attachment)
+                except Exception as ex:
+                    template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+                    wrong = template.format(type(ex).__name__, ex.args)
+                    message = '\n' + 'Ошибка спама:\n' + 'vk.com/id' + str(user_id0) + '\nзабанил нас\n'  + wrong
+                    FileWork.delete_user(user_id0)
+                    vk_api.send_messages(host, token, message, attachment)
+        vk_api.send_messages(host, token, 'Сделано', attachment)
 
-def delete_user(user_id):
-    user_list = get_user_list()
-    if user_list is None:
-        return
-    if str(user_id) in user_list:
-        user_list.remove(str(user_id))
-        file = open(filename, 'wt')
-        try:
-            for l in user_list:
-                file.write(str(l) + '\n')
-        finally:
-            file.close()
-    return
-
-
-def get_user_list():
-    user_list = list()
-    file = open(filename)
-    try:
-        for line in file:
-            line = line[:-1]
-            user_list.append(line)
-    except OSError:
-        user_list = None
-    finally:
-        file.close()
-    return user_list
-
-
-for c in range(20):
-    add_user(c)
-print(get_user_list())
-delete_user(3)
-print(get_user_list())
-#data = {'body': '/spam:Привет все\nHow are u?'}
-#
-#if '/' == data['body'].lower()[0]:
-#    print(True)
-#    mes_to_spam = data['body'][6:]
-#else:
-#    print(False)
-#print(mes_to_spam)
+    @staticmethod
+    def show_users(token):
+        attachment = ''
+        list_to_spam = FileWork.get_user_list()
+        message = 'Users:\n'
+        i = 1
+        for l in list_to_spam:
+            user_id0 = l
+            if user_id0 == host:
+                continue
+            else:
+                message = message + str(i) + ': ' + 'vk.com/id' + str(l) + '\n'
+                i += 1
+        vk_api.send_messages(host, token, message, attachment)
