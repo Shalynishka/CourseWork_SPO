@@ -1,15 +1,22 @@
-from Handler import CommandHandler
+from Handler import command_handler
 
 
-def info():
-    message = ''
-    len = CommandHandler.command_list.__sizeof__()#######################
-    for c in CommandHandler.command_list:
-        message += c.keys[0] + '-' + c.description + '\n'+len
+class Info:
+    def __init__(self):
+        info_command = command_handler.Command()
+        info_command.keys = ['помощь', 'нужна помощь', 'помоги', 'help', 'я тупой']
+        info_command.description = 'Покажу список команд'
+        info_command.process = Info.info
+
+    @staticmethod
+    def info():
+        message = ''
+        for c in command_handler.command_list:
+            message += c.keys[0] + ' - ' + c.description + '\n'
         return message, ''
 
+# if u wanna be my friend, create new object. Without it doesn't work!!!!!
 
-info_command = CommandHandler.Command()
-info_command.keys = ['помоги', 'помоги', 'help']
-info_command.description = 'Покажу список команд'
-info_command.process = info
+
+Info()
+
